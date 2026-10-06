@@ -1,0 +1,41 @@
+services:
+  edge-runtime:
+    image: supabase/edge-runtime:v1.76.2
+    command: ["start", "--main-service", "/home/deno/functions/main"]
+    container_name: edge-runtime
+    restart: unless-stopped
+    environment:
+      JWT_SECRET: ${JWT_SECRET}
+      SUPABASE_URL: http://postgrest:3000
+      SERVICE_KEY: ${SERVICE_KEY}
+      VERIFY_JWT: "false"
+    volumes:
+      - ./functions:/home/deno/functions
+    ports:
+      - "127.0.0.1:9000:9000"
+    depends_on:
+      - postgrest
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    depends_on:
+      - postgrest
+      - gotrue
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
