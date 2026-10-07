@@ -144,7 +144,7 @@ sudo systemctl set-default graphical.target
 - [x] **2.1** Sistema al día (349 paquetes, base limpia)
 - [x] **2.2** Hostname definitivo: `hp-server`
 - [x] **2.3** Tapa: no suspender (drop-in logind + targets masked)
-- [ ] **2.4** SSH con llave, sin password (⬜ pendiente: sigue con password)
+- [x] **2.4** SSH con llave, sin password — ✅ 2026-10-07: llave ed25519 de la PC (`<usuario>@pc-windows`) en `~/.ssh/authorized_keys`; `PasswordAuthentication no` + `KbdInteractiveAuthentication no` vía `/etc/ssh/sshd_config.d/10-no-password.conf`. Verificado: entra con llave, contraseña rechazada (`Permission denied (publickey)`)
 - [x] **2.5** swappiness 10 + vfs_cache_pressure 50
 - [x] **2.6** TRIM (`fstrim.timer`) — noatime en fstab pendiente de verificar
 - [x] **2.7** Journal capado a 200 MB
@@ -288,10 +288,31 @@ services:
 
 ## FASE 5 — Operación ⬜
 
-- [ ] **5.1** Monitoreo
+- [x] **5.1** Monitoreo — ✅ 2026-10-07: **Cockpit** 287.1 (`apt install cockpit`), socket bindeado a `127.0.0.1:9090` vía drop-in `/etc/systemd/system/cockpit.socket.d/10-localhost.conf`. Acceso desde la PC: `ssh -L 9090:localhost:9090` → `https://localhost:9090`. Verificado: `ss` muestra solo 127.0.0.1:9090, HTTP 200 local. **Netdata descartado** (RAM/CPU en Core 2 Duo con 4 GB); **Webmin descartado** (Cockpit + Portainer cubren lo necesario)
 - [ ] **5.2** Backups cifrados fuera del SSD
 - [ ] **5.3** Actualizaciones de seguridad
 - [ ] **5.4** Runbook de recuperación
+
+---
+
+## MIGRACIÓN — sistema-gestion-pedidos ✅ (2026-10-06)
+
+- [x] App self-hosted: imagen Docker `pedidos:latest` (Next.js standalone, build en PC) corriendo como servicio `app`
+- [x] Datos: 11 tablas restauradas desde Supabase (1702 productos, 48 clientes, 166 pedidos)
+- [x] Auth: GoTrue (usuario real + login anónimo habilitado)
+- [x] Storage: shim supabase-compatible en edge-runtime (upload_binary/download_file + RLS)
+- [x] Gateway: Caddy (`/rest/v1`, `/auth/v1`, `/storage/v1`, `/` → app)
+- [x] Acceso: Tailscale `https://hp-server.<tu-tailnet>.ts.net` — **verificado desde el celu, más rápido que Supabase**
+- [x] Config versionada: github.com/<tu-usuario>/hp-server (privado)
+
+**Pendientes de la migración:**
+- [x] Fotos de productos: **no había nada que migrar** — las 331 filas de `imagenes` (324 nombres únicos) apuntan a `public/productos/` dentro del repo (324 archivos, correspondencia 1:1). Se sirven desde la propia app; el bucket de Supabase nunca fue necesario. Dato: el subdominio `<ref>.supabase.co` ya no resuelve (NXDOMAIN) 
+- [x] Cron de reportes: crontab del server instalado y verificado (`59 10 * * 3` = mié 10:59 -03 = 13:59 UTC, igual que Vercel), daemon `cron` active, `%` escapado, log en `~/reportes_cron.log`. Test manual: HTTP 200.
+- [x] Rotación de secretos — **Tier 1 (2026-10-07)**: passwords de PostgreSQL (`postgres`, `platform`, `authenticator`) y contraseña de login de la app rotadas y verificadas (gotrue 200, postgrest 200, LOGIN_OK). Backups: `~/server/*.bak-20261007-1935`
+- [ ] Rotación de secretos — **Tier 2 (pendiente de decisión)**: `JWT_SECRET` + claves `ANON_KEY`/`SERVICE_KEY` — requiere rebuild de la imagen (NEXT_PUBLIC_* horneados). Riesgo actual: bajo (exposición solo en chat privado)
+- [ ] (opcional) Agregar `CRON_SECRET` al endpoint de reportes
+- [ ] Dar de baja Vercel + Supabase cuando todo esté confirmado
+- [ ] (Opcional) `tailscale funnel` para URL pública
 
 ---
 
