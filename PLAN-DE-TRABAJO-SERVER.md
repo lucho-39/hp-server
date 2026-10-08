@@ -309,8 +309,8 @@ services:
 - [x] Fotos de productos: **no había nada que migrar** — las 331 filas de `imagenes` (324 nombres únicos) apuntan a `public/productos/` dentro del repo (324 archivos, correspondencia 1:1). Se sirven desde la propia app; el bucket de Supabase nunca fue necesario. Dato: el subdominio `<ref>.supabase.co` ya no resuelve (NXDOMAIN) 
 - [x] Cron de reportes: crontab del server instalado y verificado (`59 10 * * 3` = mié 10:59 -03 = 13:59 UTC, igual que Vercel), daemon `cron` active, `%` escapado, log en `~/reportes_cron.log`. Test manual: HTTP 200.
 - [x] Rotación de secretos — **Tier 1 (2026-10-07)**: passwords de PostgreSQL (`postgres`, `platform`, `authenticator`) y contraseña de login de la app rotadas y verificadas (gotrue 200, postgrest 200, LOGIN_OK). Backups: `~/server/*.bak-20261007-1935`
-- [ ] Rotación de secretos — **Tier 2 (pendiente de decisión)**: `JWT_SECRET` + claves `ANON_KEY`/`SERVICE_KEY` — requiere rebuild de la imagen (NEXT_PUBLIC_* horneados). Riesgo actual: bajo (exposición solo en chat privado)
-- [ ] (opcional) Agregar `CRON_SECRET` al endpoint de reportes
+- [x] Rotación de secretos — **Tier 2 (2026-10-07)**: `JWT_SECRET` + claves `ANON_KEY`/`SERVICE_KEY`/`SUPABASE_SERVICE_KEY` rotadas. Imagen `pedidos:v2` buildeada en PC (build-arg con clave nueva), transferida y cargada en el server. Cutover: backups `*.bak-tier2-20261007-2106`, 4 contenedores recreados (gotrue, postgrest, edge-runtime, app). Verificado: clave vieja **401**, clave nueva **200**, foto estática **200**, cron con CRON_SECRET **200**. Rollback: restaurar backups + `sed` de imagen a `pedidos:latest` + `docker compose up -d`
+- [x] (opcional) Agregar `CRON_SECRET` al endpoint de reportes — hecho: secreto en `~/server/.env`, ref `${CRON_SECRET}` en `docker-compose.override.yml:49`, crontab envía header, verificado `sin header: 401` / `con header: 200`
 - [ ] Dar de baja Vercel + Supabase cuando todo esté confirmado
 - [ ] (Opcional) `tailscale funnel` para URL pública
 

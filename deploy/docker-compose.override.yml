@@ -39,3 +39,19 @@ services:
           memory: 128M
         reservations:
           memory: 64M
+
+  app:
+    image: pedidos:v2
+    container_name: app
+    restart: unless-stopped
+    environment:
+      SUPABASE_SERVICE_KEY: ${SERVICE_KEY}
+      CRON_SECRET: ${CRON_SECRET}
+    ports:
+      - "127.0.0.1:3001:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+        reservations:
+          memory: 256M

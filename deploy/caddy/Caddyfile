@@ -9,6 +9,6 @@
 		reverse_proxy edge-runtime:9000
 	}
 	handle {
-		respond "hp-server - app not deployed yet" 200
+		reverse_proxy app:3000
 	}
 }
