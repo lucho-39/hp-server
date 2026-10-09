@@ -144,7 +144,7 @@ sudo systemctl set-default graphical.target
 - [x] **2.1** Sistema al día (349 paquetes, base limpia)
 - [x] **2.2** Hostname definitivo: `hp-server`
 - [x] **2.3** Tapa: no suspender (drop-in logind + targets masked)
-- [x] **2.4** SSH con llave, sin password — ✅ 2026-10-07: llave ed25519 de la PC (`<usuario>@pc-windows`) en `~/.ssh/authorized_keys`; `PasswordAuthentication no` + `KbdInteractiveAuthentication no` vía `/etc/ssh/sshd_config.d/10-no-password.conf`. Verificado: entra con llave, contraseña rechazada (`Permission denied (publickey)`)
+- [x] **2.4** SSH con llave, sin password — ✅ 2026-10-07: llave ed25519 de la PC (`<usuario>@<pc-windows>`) en `~/.ssh/authorized_keys`; `PasswordAuthentication no` + `KbdInteractiveAuthentication no` vía `/etc/ssh/sshd_config.d/10-no-password.conf`. Verificado: entra con llave, contraseña rechazada (`Permission denied (publickey)`)
 - [x] **2.5** swappiness 10 + vfs_cache_pressure 50
 - [x] **2.6** TRIM (`fstrim.timer`) — noatime en fstab pendiente de verificar
 - [x] **2.7** Journal capado a 200 MB
