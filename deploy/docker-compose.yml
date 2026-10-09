@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: platform
       POSTGRES_USER: platform
-      POSTGRES_PASSWORD: REPLACE_ME_POSTGRES_PASSWORD
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD not set in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -28,7 +28,7 @@ services:
     container_name: postgrest
     restart: unless-stopped
     environment:
-      PGRST_DB_URI: postgres://authenticator:REPLACE_ME_POSTGRES_PASSWORD@postgres:5432/platform
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@postgres:5432/platform
       PGRST_DB_SCHEMA: public
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${JWT_SECRET}
@@ -55,7 +55,7 @@ services:
       GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "true"
       API_EXTERNAL_URL: http://localhost:9999
       GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://platform:REPLACE_ME_POSTGRES_PASSWORD@postgres:5432/platform?search_path=auth,public
+      GOTRUE_DB_DATABASE_URL: postgres://platform:${POSTGRES_PASSWORD}@postgres:5432/platform?search_path=auth,public
       GOTRUE_SITE_URL: http://localhost:3000
       GOTRUE_DISABLE_SIGNUP: "false"
       GOTRUE_JWT_SECRET: ${JWT_SECRET}
